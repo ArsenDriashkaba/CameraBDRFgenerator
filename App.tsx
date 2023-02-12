@@ -1,11 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect, useRef } from "react";
+import { Text, View, StyleSheet } from "react-native";
+import Constants from "expo-constants";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import { ControlMenu } from "./components/ControlMenu";
+import { ControlWindow } from "./components/CameraWindow";
+import { useCameraPermissions } from "./hooks/useCameraPermissions";
 
 export default function App() {
+  const [image, setImage] = useState(null);
+  const cameraRef = useRef<any>();
+
+  const { hasCameraPermission } = useCameraPermissions();
+
+  const takePicture = async () => {
+    if (cameraRef) {
+      try {
+        const data = await cameraRef?.current?.takePictureAsync({
+          quality: 1,
+          base64: true,
+          exif: false,
+        });
+        console.log(data);
+        setImage(data.uri);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  const savePicture = async () => {
+    if (image) {
+      try {
+        await MediaLibrary.createAssetAsync(image);
+        alert("Picture saved! 🎉");
+        setImage(null);
+        console.log("saved successfully");
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  if (hasCameraPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <ControlWindow image={image} cameraRef={cameraRef} />
+
+      <ControlMenu
+        imageMode={!!image}
+        savePicture={savePicture}
+        takePicture={takePicture}
+        onRetakeHandle={() => setImage(null)}
+      />
     </View>
   );
 }
@@ -13,8 +63,25 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
+    paddingTop: Constants.statusBarHeight,
+    backgroundColor: "#000",
+    padding: 8,
+  },
+  button: {
+    height: 40,
+    borderRadius: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#E9730F",
+    marginLeft: 10,
+  },
+  topControls: {
+    flex: 1,
   },
 });

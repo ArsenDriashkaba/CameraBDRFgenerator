@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import Constants from "expo-constants";
-import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import { ControlMenu } from "./components/ControlMenu";
 import { ControlWindow } from "./components/CameraWindow";
 import { useCameraPermissions } from "./hooks/useCameraPermissions";
+import { test } from "./utils/tflite";
 
 export default function App() {
   const [image, setImage] = useState(null);
